@@ -1,0 +1,3 @@
+<launch>
+	<node name="side_walk_follower" pkg="task1" type="task1.py" output="screen"></node>
+</launch>

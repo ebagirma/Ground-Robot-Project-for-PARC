@@ -1,0 +1,3 @@
+<launch>
+    <node name="traffic_sign_detection_and_recognition" pkg="task2" type="task2.py" output="screen"></node>
+</launch>

@@ -1,0 +1,64 @@
+<launch>
+    <!-- ========================= CLI Arguments ========================= -->
+    <!-- Goal Location -->
+    <arg name="goal_x" default="7.225" />
+    <arg name="goal_y" default="-6.785" />
+    <arg name="goal_theta" default="-1.57079632679" />
+
+    <!-- put goal args to parameter -->
+    <rosparam param="goal_x" subst_value="true">$(arg goal_x)</rosparam>
+    <rosparam param="goal_y" subst_value="true">$(arg goal_y)</rosparam>
+    <rosparam param="goal_theta" subst_value="true">$(arg goal_theta)</rosparam>
+
+    <!-- Robot initial pose -->
+    <arg name="x" default="8" />
+    <arg name="y" default="9" />
+    <arg name="z" default="0.373" />
+    <arg name="yaw" default="-1.57079632679" />
+
+    <!-- Gazebo World file to load -->
+    <arg name="world_name" default="$(find parc-robot)worlds/parc_task3.world" />
+
+    <!-- ========================= Robot Model ========================= -->
+    <!-- Load URDF -->
+    <param name="robot_description" command="$(find xacro)/xacro '$(find parc-robot)/urdf/robot.xacro'" />
+
+    <!-- Generate TF from URDF -->
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+
+    <!-- ========================= Simulator ========================= -->
+    <!-- Start Gazebo -->
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="world_name" value="$(arg world_name)" />
+        <arg name="paused" value="false" />
+        <arg name="use_sim_time" value="true" />
+        <arg name="gui" value="true" />
+        <arg name="headless" value="false" />
+        <arg name="debug" value="false" />
+    </include>
+
+    <!-- Spawn Robot model in Gazebo -->
+    <node name="spawn_robot_model" pkg="gazebo_ros" type="spawn_model" args="
+                  -x $(arg x)
+                  -y $(arg y)
+                  -z $(arg z)
+                  -Y $(arg yaw)
+                  -unpause
+                  -urdf
+                  -param robot_description
+                  -model 'robot'" />
+
+    <!-- Show Goal Location in Gazebo -->
+    <node name="spawn_goal_location" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" args="
+                  -file $(find parc-robot)/models/goal_location/model.sdf
+                  -sdf
+                  -model goal_location
+                  -x $(arg goal_x)
+                  -y $(arg goal_y)
+                  -z 0.373" />
+
+    <!-- ========================= Visualize ========================= -->
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find parc-robot)/rviz/task3.rviz" />
+</launch>
